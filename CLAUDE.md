@@ -28,23 +28,27 @@ Run these from the repo root. Use `./gradlew` in Bash and `.\gradlew.bat` in Pow
 - **Versions:** AGP 9.x uses its built-in Kotlin support, so the `kotlin-android` plugin isn't applied; only `kotlin.compose` is.
 - **Dependency catalog:** dependencies go in `gradle/libs.versions.toml` and are referenced as `libs.*` in `app/build.gradle.kts`.
 - **SDK and Java:** compileSdk/targetSdk 37, minSdk 26, Java 11. `java.time` is used natively, with no core library desugaring.
-- **New libraries:** don't add new libraries or Gradle plugins without asking. Already approved for the base app: Room, KSP, lifecycle-viewmodel-compose, lifecycle-runtime-compose, MockK, Turbine, kotlinx-coroutines-test.
+- **New libraries:** don't add new libraries or Gradle plugins without asking. Already approved for the base app: Room (+ its Gradle plugin), KSP, lifecycle-viewmodel-compose, lifecycle-runtime-compose, navigation-compose, MockK, Turbine, kotlinx-coroutines-test. There's no icons library: icons are vector drawables in `res/drawable/` (`ic_*.xml`).
+- **Room schema:** exported to `app/schemas/` and committed. A schema change needs a version bump and a migration.
 - **Release builds:** use the AGP `optimization {}` block, not `isMinifyEnabled`, and keep rules live in `app/src/main/keepRules/`.
 - **Package name:** `com.fitnessmarket.bootcamptodo` is deliberately kept. Only the user-visible `app_name` is "Workout Logger", and the theme is still `BootCampTodoTheme`.
 
-## Architecture (decided; the base app is not built yet)
+## Architecture
 
-The code is still the Compose template (`MainActivity` shows a Greeting). The intended structure is MVVM in layers:
+MVVM in layers under `com.fitnessmarket.bootcamptodo`. Dependencies point inward: ui → domain ← data.
 
-- **data:** Room `WorkoutEntity` / `WorkoutDao` / `WorkoutDatabase` and a `WorkoutRepository` implementation. The DAO exposes a `Flow` ordered by date DESC.
-- **domain:** a `Workout` model, the repository interface, and use cases (add with validation: non-blank name and duration > 0; get; delete; and later, the streak calculation).
-- **ui:** a `WorkoutViewModel` exposing `StateFlow` UI state, consumed with `collectAsStateWithLifecycle`.
+- **domain/:** the `Workout` model (holds a `LocalDate`), the `WorkoutRepository` interface, and one use case per action. `AddWorkoutUseCase` owns all validation (name trimmed, 1–50 characters; duration 1–1440; date not after today). It returns `AddWorkoutResult.Success`, or `Invalid(Set<AddWorkoutError>)` with every error found at once. "Today" comes from an injected `java.time.Clock`.
+- **data/:** Room `WorkoutEntity` (date as `dateEpochDay: Long`), `WorkoutDao`, `WorkoutDatabase`, and `RoomWorkoutRepository`, which maps entity ↔ domain. Newest-first ordering lives in the DAO SQL (`dateEpochDay DESC, id DESC`).
+- **di/AppContainer:** built once in `WorkoutApp.onCreate()`. It owns the DB, the repository, the use cases and the `Clock`. Each ViewModel has a `companion fun factory(container)`.
+- **ui/:** `WorkoutNavHost` (string routes `list` → `add`), with a screen and a ViewModel per destination. Screens are split into a stateful `XxxScreen(viewModel)` and a stateless `XxxContent(uiState, callbacks)`, which is what the previews use. The add screen reports success through a one-shot `saved` `Flow` (a Channel), not through state.
+
+Tests: JVM unit tests in `app/src/test` use `MainDispatcherRule` for `viewModelScope`, and run the real use cases over a MockK repository. The Room DAO test is instrumented (`app/src/androidTest`, in-memory DB).
 
 Decisions already made. Don't revisit them without asking:
 
 - **DI:** a hand-written app container (an `Application` subclass holding the singletons), no Hilt. ViewModels are built through a `ViewModelProvider.Factory` from the container.
 - **Dates:** stored as a `Long` epoch day (`LocalDate.toEpochDay()`; java.time is available natively at minSdk 26). Streak logic works on epoch days, which makes "consecutive days" a simple integer difference.
-- **Screens:** a single screen. Adding a workout happens in a dialog, so there's no Navigation library.
+- **Screens:** two screens (list and add) with navigation-compose and string routes. Type-safe routes would need the kotlinx-serialization plugin. The add screen's date defaults to today, and future dates can't be picked.
 - **Tests:** JUnit 4 + MockK + Turbine + kotlinx-coroutines-test. Business logic (use cases, ViewModel) gets unit tests, written TDD-style (red → green → refactor).
 
 ## Process and evidence

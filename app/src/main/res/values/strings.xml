@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">Workout Logger</string>
+
+    <!-- List screen -->
+    <string name="add_workout">Add workout</string>
+    <string name="empty_workouts">No workouts yet. Tap + to log your first one.</string>
+    <string name="workout_summary">%1$s · %2$d min</string>
+    <string name="delete_workout">Delete %1$s</string>
+
+    <!-- Add screen -->
+    <string name="back">Back</string>
+    <string name="field_name">Workout name</string>
+    <string name="field_date">Date</string>
+    <string name="field_duration">Duration (minutes)</string>
+    <string name="pick_date">Pick date</string>
+    <string name="save">Save</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Validation errors -->
+    <string name="error_name_blank">Enter a name</string>
+    <string name="error_name_too_long">Name must be 50 characters or fewer</string>
+    <string name="error_duration_invalid">Enter a whole number from 1 to 1440</string>
+    <string name="error_date_in_future">Date can\'t be in the future</string>
 </resources>
