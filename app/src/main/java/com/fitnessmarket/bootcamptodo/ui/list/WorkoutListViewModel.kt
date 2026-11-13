@@ -29,8 +29,8 @@ class WorkoutListViewModel(
         .map { WorkoutListUiState(workouts = it, isLoading = false) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WorkoutListUiState())
 
-    fun onDelete(id: Long) {
-        viewModelScope.launch { deleteWorkout(id) }
+    fun onDelete(workout: Workout) {
+        viewModelScope.launch { deleteWorkout(workout) }
     }
 
     companion object {

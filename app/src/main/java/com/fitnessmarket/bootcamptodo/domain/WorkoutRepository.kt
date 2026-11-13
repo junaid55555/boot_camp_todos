@@ -9,4 +9,7 @@ interface WorkoutRepository {
     suspend fun add(workout: Workout)
 
     suspend fun delete(id: Long)
+
+    /** Photo file names currently attached to a workout. */
+    suspend fun photoFileNames(): Set<String>
 }

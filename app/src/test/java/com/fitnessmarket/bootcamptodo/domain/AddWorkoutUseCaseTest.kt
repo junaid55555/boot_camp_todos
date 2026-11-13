@@ -35,6 +35,15 @@ class AddWorkoutUseCaseTest {
     }
 
     @Test
+    fun `photo file name is stored on the workout`() = runTest {
+        addWorkout(name = "Run", date = today, durationText = "30", photoFileName = "a.jpg")
+
+        coVerify(exactly = 1) {
+            repository.add(Workout(name = "Run", date = today, durationMinutes = 30, photoFileName = "a.jpg"))
+        }
+    }
+
+    @Test
     fun `past date is accepted`() = runTest {
         val result = addWorkout(name = "Swim", date = today.minusDays(10), durationText = "45")
 
@@ -48,7 +57,10 @@ class AddWorkoutUseCaseTest {
 
     @Test
     fun `name over 50 characters is rejected`() = runTest {
-        assertInvalid(addWorkout(name = "a".repeat(51), date = today, durationText = "30"), AddWorkoutError.NAME_TOO_LONG)
+        assertInvalid(
+            addWorkout(name = "a".repeat(51), date = today, durationText = "30"),
+            AddWorkoutError.NAME_TOO_LONG,
+        )
     }
 
     @Test
@@ -88,7 +100,10 @@ class AddWorkoutUseCaseTest {
 
     @Test
     fun `future date is rejected`() = runTest {
-        assertInvalid(addWorkout(name = "Run", date = today.plusDays(1), durationText = "30"), AddWorkoutError.DATE_IN_FUTURE)
+        assertInvalid(
+            addWorkout(name = "Run", date = today.plusDays(1), durationText = "30"),
+            AddWorkoutError.DATE_IN_FUTURE,
+        )
     }
 
     @Test
@@ -97,9 +112,9 @@ class AddWorkoutUseCaseTest {
 
         assertEquals(
             AddWorkoutResult.Invalid(
-                setOf(AddWorkoutError.NAME_BLANK, AddWorkoutError.DURATION_INVALID, AddWorkoutError.DATE_IN_FUTURE)
+                setOf(AddWorkoutError.NAME_BLANK, AddWorkoutError.DURATION_INVALID, AddWorkoutError.DATE_IN_FUTURE),
             ),
-            result
+            result,
         )
     }
 

@@ -21,7 +21,7 @@ class WorkoutDaoTest {
     fun setUp() {
         db = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
-            WorkoutDatabase::class.java
+            WorkoutDatabase::class.java,
         ).build()
         dao = db.workoutDao()
     }
@@ -48,5 +48,15 @@ class WorkoutDaoTest {
         dao.deleteById(deleteId)
 
         assertEquals(listOf(keepId), dao.observeAll().first().map { it.id })
+    }
+
+    @Test
+    fun photoFileName_roundTripsAndIsListed() = runTest {
+        val workout = WorkoutEntity(name = "Run", dateEpochDay = 100, durationMinutes = 10)
+        dao.insert(workout.copy(photoFileName = "a.jpg"))
+        dao.insert(workout)
+
+        assertEquals(listOf(null, "a.jpg"), dao.observeAll().first().map { it.photoFileName })
+        assertEquals(listOf("a.jpg"), dao.photoFileNames())
     }
 }

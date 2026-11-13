@@ -9,6 +9,7 @@ import com.fitnessmarket.bootcamptodo.di.AppContainer
 import com.fitnessmarket.bootcamptodo.domain.AddWorkoutError
 import com.fitnessmarket.bootcamptodo.domain.AddWorkoutResult
 import com.fitnessmarket.bootcamptodo.domain.AddWorkoutUseCase
+import com.fitnessmarket.bootcamptodo.domain.PhotoStore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,12 +27,15 @@ data class AddWorkoutUiState(
     val durationText: String = "",
     val errors: Set<AddWorkoutError> = emptySet(),
     val isSaving: Boolean = false,
+    /** Photo taken for this workout, if any; a name in the [PhotoStore]. */
+    val photoFileName: String? = null,
     /** Latest selectable date for the date picker. */
     val today: LocalDate,
 )
 
 class AddWorkoutViewModel(
     private val addWorkout: AddWorkoutUseCase,
+    private val photoStore: PhotoStore,
     clock: Clock,
 ) : ViewModel() {
 
@@ -39,6 +43,7 @@ class AddWorkoutViewModel(
     val uiState: StateFlow<AddWorkoutUiState> = _uiState.asStateFlow()
 
     private val _saved = Channel<Unit>(Channel.BUFFERED)
+
     /** Emits once after the workout is stored; the screen navigates back. */
     val saved: Flow<Unit> = _saved.receiveAsFlow()
 
@@ -54,13 +59,20 @@ class AddWorkoutViewModel(
         it.copy(durationText = durationText, errors = it.errors - AddWorkoutError.DURATION_INVALID)
     }
 
+    /** Where the camera should write the next photo. Unused files are removed at the next app start. */
+    fun newPhotoFileName(): String = photoStore.newFileName()
+
+    fun onPhotoTaken(fileName: String) = _uiState.update { it.copy(photoFileName = fileName) }
+
+    fun onRemovePhoto() = _uiState.update { it.copy(photoFileName = null) }
+
     fun onSave() {
         val state = _uiState.value
         if (state.isSaving) return
         _uiState.update { it.copy(isSaving = true) }
 
         viewModelScope.launch {
-            when (val result = addWorkout(state.name, state.date, state.durationText)) {
+            when (val result = addWorkout(state.name, state.date, state.durationText, state.photoFileName)) {
                 AddWorkoutResult.Success -> {
                     _uiState.update { it.copy(isSaving = false, errors = emptySet()) }
                     _saved.send(Unit)
@@ -73,7 +85,7 @@ class AddWorkoutViewModel(
 
     companion object {
         fun factory(container: AppContainer): ViewModelProvider.Factory = viewModelFactory {
-            initializer { AddWorkoutViewModel(container.addWorkout, container.clock) }
+            initializer { AddWorkoutViewModel(container.addWorkout, container.photoStore, container.clock) }
         }
     }
 }

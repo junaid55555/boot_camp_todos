@@ -1,9 +1,15 @@
 package com.fitnessmarket.bootcamptodo.data
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
-@Database(entities = [WorkoutEntity::class], version = 1, exportSchema = true)
+@Database(
+    entities = [WorkoutEntity::class],
+    version = 2,
+    exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)], // 2: nullable photoFileName column
+)
 abstract class WorkoutDatabase : RoomDatabase() {
     abstract fun workoutDao(): WorkoutDao
 }

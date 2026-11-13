@@ -16,6 +16,8 @@ class RoomWorkoutRepository(private val dao: WorkoutDao) : WorkoutRepository {
     }
 
     override suspend fun delete(id: Long) = dao.deleteById(id)
+
+    override suspend fun photoFileNames(): Set<String> = dao.photoFileNames().toSet()
 }
 
 private fun WorkoutEntity.toDomain() = Workout(
@@ -23,6 +25,7 @@ private fun WorkoutEntity.toDomain() = Workout(
     name = name,
     date = LocalDate.ofEpochDay(dateEpochDay),
     durationMinutes = durationMinutes,
+    photoFileName = photoFileName,
 )
 
 private fun Workout.toEntity() = WorkoutEntity(
@@ -30,4 +33,5 @@ private fun Workout.toEntity() = WorkoutEntity(
     name = name,
     dateEpochDay = date.toEpochDay(),
     durationMinutes = durationMinutes,
+    photoFileName = photoFileName,
 )

@@ -10,4 +10,6 @@ data class WorkoutEntity(
     /** [java.time.LocalDate.toEpochDay] of the workout date. */
     val dateEpochDay: Long,
     val durationMinutes: Int,
+    /** Added in DB version 2. */
+    val photoFileName: String? = null,
 )

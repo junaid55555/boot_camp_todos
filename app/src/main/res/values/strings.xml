@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Workout Logger</string>
 
+    <!-- Bottom tabs -->
+    <string name="tab_home">Home</string>
+    <string name="tab_profile">Profile</string>
+
+    <!-- Profile screen -->
+    <string name="dark_theme">Dark theme</string>
+
     <!-- List screen -->
     <string name="add_workout">Add workout</string>
     <string name="empty_workouts">No workouts yet. Tap + to log your first one.</string>
@@ -16,6 +23,11 @@
     <string name="save">Save</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="add_photo">Add photo</string>
+    <string name="retake_photo">Retake</string>
+    <string name="remove_photo">Remove</string>
+    <string name="workout_photo">Workout photo</string>
+    <string name="no_camera_app">No camera app found</string>
 
     <!-- Validation errors -->
     <string name="error_name_blank">Enter a name</string>

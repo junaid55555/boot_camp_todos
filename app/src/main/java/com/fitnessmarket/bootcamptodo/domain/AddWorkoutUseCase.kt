@@ -14,7 +14,12 @@ class AddWorkoutUseCase(
     private val repository: WorkoutRepository,
     private val clock: Clock,
 ) {
-    suspend operator fun invoke(name: String, date: LocalDate, durationText: String): AddWorkoutResult {
+    suspend operator fun invoke(
+        name: String,
+        date: LocalDate,
+        durationText: String,
+        photoFileName: String? = null,
+    ): AddWorkoutResult {
         val trimmedName = name.trim()
         val duration = durationText.trim().toIntOrNull()
 
@@ -28,7 +33,9 @@ class AddWorkoutUseCase(
         }
         if (errors.isNotEmpty()) return AddWorkoutResult.Invalid(errors)
 
-        repository.add(Workout(name = trimmedName, date = date, durationMinutes = duration!!))
+        repository.add(
+            Workout(name = trimmedName, date = date, durationMinutes = duration!!, photoFileName = photoFileName),
+        )
         return AddWorkoutResult.Success
     }
 

@@ -15,4 +15,7 @@ interface WorkoutDao {
 
     @Query("DELETE FROM workouts WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    @Query("SELECT photoFileName FROM workouts WHERE photoFileName IS NOT NULL")
+    suspend fun photoFileNames(): List<String>
 }

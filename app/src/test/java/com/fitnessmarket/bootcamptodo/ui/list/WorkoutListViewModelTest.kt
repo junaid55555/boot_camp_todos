@@ -4,12 +4,14 @@ import app.cash.turbine.test
 import com.fitnessmarket.bootcamptodo.MainDispatcherRule
 import com.fitnessmarket.bootcamptodo.domain.DeleteWorkoutUseCase
 import com.fitnessmarket.bootcamptodo.domain.GetWorkoutsUseCase
+import com.fitnessmarket.bootcamptodo.domain.PhotoStore
 import com.fitnessmarket.bootcamptodo.domain.Workout
 import com.fitnessmarket.bootcamptodo.domain.WorkoutRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -28,7 +30,9 @@ class WorkoutListViewModelTest {
         every { observeWorkouts() } returns workoutsFlow
         coEvery { delete(any()) } returns Unit
     }
-    private val viewModel = WorkoutListViewModel(GetWorkoutsUseCase(repository), DeleteWorkoutUseCase(repository))
+    private val photoStore = mockk<PhotoStore> { every { delete(any()) } returns Unit }
+    private val viewModel =
+        WorkoutListViewModel(GetWorkoutsUseCase(repository), DeleteWorkoutUseCase(repository, photoStore))
 
     @Test
     fun `starts loading then shows repository workouts`() = runTest {
@@ -51,9 +55,12 @@ class WorkoutListViewModelTest {
     }
 
     @Test
-    fun `onDelete deletes workout by id`() = runTest {
-        viewModel.onDelete(7L)
+    fun `onDelete deletes the workout and its photo`() = runTest {
+        val workout = Workout(id = 7, name = "Run", date = LocalDate.of(2026, 3, 1), durationMinutes = 30)
+
+        viewModel.onDelete(workout.copy(photoFileName = "a.jpg"))
 
         coVerify(exactly = 1) { repository.delete(7L) }
+        verify(exactly = 1) { photoStore.delete("a.jpg") }
     }
 }
