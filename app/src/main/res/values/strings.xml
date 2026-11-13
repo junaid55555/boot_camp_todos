@@ -28,6 +28,20 @@
     <string name="remove_photo">Remove</string>
     <string name="workout_photo">Workout photo</string>
     <string name="no_camera_app">No camera app found</string>
+    <string name="section_details">Details</string>
+    <string name="section_photo">Photo (optional)</string>
+    <string name="name_placeholder">e.g. Morning run</string>
+    <string name="name_counter">%1$d/%2$d</string>
+    <string name="duration_hint">Between %1$d and %2$d minutes</string>
+    <string name="date_today">Today</string>
+    <string name="date_yesterday">Yesterday</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+    <string name="add_photo_hint">Snap a photo to remember this session</string>
+    <string name="saving">Saving</string>
+    <string name="save_failed">Couldn\'t save the workout. Please try again.</string>
 
     <!-- Validation errors -->
     <string name="error_name_blank">Enter a name</string>
