@@ -9,6 +9,7 @@ import com.fitnessmarket.bootcamptodo.data.WorkoutDatabase
 import com.fitnessmarket.bootcamptodo.domain.AddWorkoutUseCase
 import com.fitnessmarket.bootcamptodo.domain.CleanUpOrphanPhotosUseCase
 import com.fitnessmarket.bootcamptodo.domain.DeleteWorkoutUseCase
+import com.fitnessmarket.bootcamptodo.domain.FilterWorkoutsUseCase
 import com.fitnessmarket.bootcamptodo.domain.GetWorkoutsUseCase
 import com.fitnessmarket.bootcamptodo.domain.SettingsRepository
 import com.fitnessmarket.bootcamptodo.domain.WorkoutRepository
@@ -38,6 +39,7 @@ class AppContainer(
     val getWorkouts = GetWorkoutsUseCase(repository)
     val addWorkout = AddWorkoutUseCase(repository, clock)
     val deleteWorkout = DeleteWorkoutUseCase(repository, photoStore)
+    val filterWorkouts = FilterWorkoutsUseCase(clock)
     val cleanUpOrphanPhotos = CleanUpOrphanPhotosUseCase(repository, photoStore)
 
     val settings: SettingsRepository = SharedPrefsSettingsRepository(context)
