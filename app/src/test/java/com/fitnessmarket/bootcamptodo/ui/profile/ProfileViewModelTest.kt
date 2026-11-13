@@ -2,6 +2,7 @@ package com.fitnessmarket.bootcamptodo.ui.profile
 
 import com.fitnessmarket.bootcamptodo.MainDispatcherRule
 import com.fitnessmarket.bootcamptodo.domain.SettingsRepository
+import com.fitnessmarket.bootcamptodo.domain.ThemeMode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -15,36 +16,43 @@ class ProfileViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val darkThemeFlow = MutableStateFlow<Boolean?>(null)
+    private val themeModeFlow = MutableStateFlow(ThemeMode.SYSTEM)
     private val settings = mockk<SettingsRepository> {
-        every { darkTheme } returns darkThemeFlow
-        every { setDarkTheme(any()) } returns Unit
+        every { themeMode } returns themeModeFlow
+        every { setThemeMode(any()) } returns Unit
     }
     private val viewModel = ProfileViewModel(settings)
 
     @Test
-    fun `dark theme is unset until the user picks one`() {
-        assertEquals(null, viewModel.darkTheme.value)
+    fun `theme follows the system until the user picks one`() {
+        assertEquals(ThemeMode.SYSTEM, viewModel.themeMode.value)
     }
 
     @Test
-    fun `dark theme follows the saved setting`() {
-        darkThemeFlow.value = true
+    fun `theme follows the saved setting`() {
+        themeModeFlow.value = ThemeMode.DARK
 
-        assertEquals(true, viewModel.darkTheme.value)
+        assertEquals(ThemeMode.DARK, viewModel.themeMode.value)
     }
 
     @Test
-    fun `turning dark theme on saves it`() {
-        viewModel.onDarkThemeChange(true)
+    fun `picking dark saves it`() {
+        viewModel.onThemeModeChange(ThemeMode.DARK)
 
-        verify(exactly = 1) { settings.setDarkTheme(true) }
+        verify(exactly = 1) { settings.setThemeMode(ThemeMode.DARK) }
     }
 
     @Test
-    fun `turning dark theme off saves it`() {
-        viewModel.onDarkThemeChange(false)
+    fun `picking light saves it`() {
+        viewModel.onThemeModeChange(ThemeMode.LIGHT)
 
-        verify(exactly = 1) { settings.setDarkTheme(false) }
+        verify(exactly = 1) { settings.setThemeMode(ThemeMode.LIGHT) }
+    }
+
+    @Test
+    fun `picking system saves it`() {
+        viewModel.onThemeModeChange(ThemeMode.SYSTEM)
+
+        verify(exactly = 1) { settings.setThemeMode(ThemeMode.SYSTEM) }
     }
 }

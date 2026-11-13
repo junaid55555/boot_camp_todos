@@ -1,14 +1,16 @@
 package com.fitnessmarket.bootcamptodo.ui.profile
 
 import androidx.activity.ComponentActivity
-import androidx.compose.ui.test.assertIsOff
-import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.fitnessmarket.bootcamptodo.R
+import com.fitnessmarket.bootcamptodo.domain.ThemeMode
 import com.fitnessmarket.bootcamptodo.ui.theme.BootCampTodoTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -21,42 +23,53 @@ class ProfileContentTest {
     @get:Rule
     val rule = createAndroidComposeRule<ComponentActivity>()
 
-    private var requested: Boolean? = null
+    private var requested: ThemeMode? = null
 
-    private fun setContent(darkTheme: Boolean) = rule.setContent {
-        BootCampTodoTheme { ProfileContent(darkTheme = darkTheme, onDarkThemeChange = { requested = it }) }
+    private fun str(id: Int) = rule.activity.getString(id)
+
+    private fun setContent(themeMode: ThemeMode) = rule.setContent {
+        BootCampTodoTheme {
+            ProfileContent(themeMode = themeMode, appVersion = "9.9", onThemeModeChange = { requested = it })
+        }
+    }
+
+    // Each option row merges its texts, so the System row is found by its label plus description.
+    private fun option(label: Int) = rule.onNodeWithText(str(label), substring = true)
+
+    @Test
+    fun onlyTheSavedModeIsSelected() {
+        setContent(ThemeMode.DARK)
+
+        option(R.string.dark_theme).assertIsSelected()
+        option(R.string.theme_light).assertIsNotSelected()
+        option(R.string.theme_system).assertIsNotSelected()
     }
 
     @Test
-    fun switchShowsOff_whenDarkThemeIsOff() {
-        setContent(darkTheme = false)
+    fun systemIsSelected_whenFollowingTheSystem() {
+        setContent(ThemeMode.SYSTEM)
 
-        rule.onNode(isToggleable()).assertIsOff()
+        option(R.string.theme_system).assertIsSelected()
     }
 
     @Test
-    fun switchShowsOn_whenDarkThemeIsOn() {
-        setContent(darkTheme = true)
+    fun tappingAnOption_requestsThatMode() {
+        setContent(ThemeMode.LIGHT)
 
-        rule.onNode(isToggleable()).assertIsOn()
+        option(R.string.dark_theme).performClick()
+        assertEquals(ThemeMode.DARK, requested)
+
+        option(R.string.theme_system).performClick()
+        assertEquals(ThemeMode.SYSTEM, requested)
+
+        option(R.string.theme_light).performClick()
+        assertEquals(ThemeMode.LIGHT, requested)
     }
 
     @Test
-    fun tappingTheRow_requestsTheOppositeValue() {
-        setContent(darkTheme = false)
+    fun showsTheAppVersion() {
+        setContent(ThemeMode.SYSTEM)
 
-        // The label, not the switch: the whole row is the touch target.
-        rule.onNodeWithText(rule.activity.getString(R.string.dark_theme)).performClick()
-
-        assertEquals(true, requested)
-    }
-
-    @Test
-    fun tappingTheRow_whenOn_requestsOff() {
-        setContent(darkTheme = true)
-
-        rule.onNode(isToggleable()).performClick()
-
-        assertEquals(false, requested)
+        rule.onNodeWithText("9.9").performScrollTo().assertIsDisplayed()
     }
 }

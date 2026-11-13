@@ -6,15 +6,15 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fitnessmarket.bootcamptodo.di.AppContainer
 import com.fitnessmarket.bootcamptodo.domain.SettingsRepository
+import com.fitnessmarket.bootcamptodo.domain.ThemeMode
 import kotlinx.coroutines.flow.StateFlow
 
 class ProfileViewModel(private val settings: SettingsRepository) : ViewModel() {
 
-    /** null = the user hasn't picked yet, so the screen shows the system setting. */
-    val darkTheme: StateFlow<Boolean?> = settings.darkTheme
+    val themeMode: StateFlow<ThemeMode> = settings.themeMode
 
-    fun onDarkThemeChange(enabled: Boolean) {
-        settings.setDarkTheme(enabled)
+    fun onThemeModeChange(mode: ThemeMode) {
+        settings.setThemeMode(mode)
     }
 
     companion object {

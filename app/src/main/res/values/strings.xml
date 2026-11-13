@@ -6,7 +6,17 @@
     <string name="tab_profile">Profile</string>
 
     <!-- Profile screen -->
-    <string name="dark_theme">Dark theme</string>
+    <string name="profile_heading">My profile</string>
+    <string name="profile_subheading">Your preferences for Workout Logger</string>
+    <string name="section_appearance">Appearance</string>
+    <string name="section_about">About</string>
+    <string name="theme_system">System default</string>
+    <string name="theme_system_description">Match your device\'s light or dark setting</string>
+    <string name="theme_light">Light</string>
+    <string name="dark_theme">Dark</string>
+    <string name="app_version">Version</string>
+    <string name="data_storage">Your data</string>
+    <string name="data_storage_description">Stored privately on this device. Nothing is uploaded.</string>
 
     <!-- List screen -->
     <string name="add_workout">Add workout</string>

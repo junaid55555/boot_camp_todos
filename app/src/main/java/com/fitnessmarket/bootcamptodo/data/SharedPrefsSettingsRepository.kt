@@ -3,6 +3,7 @@ package com.fitnessmarket.bootcamptodo.data
 import android.content.Context
 import androidx.core.content.edit
 import com.fitnessmarket.bootcamptodo.domain.SettingsRepository
+import com.fitnessmarket.bootcamptodo.domain.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,14 +20,26 @@ class SharedPrefsSettingsRepository(
 
     private val prefs = context.applicationContext.getSharedPreferences(fileName, Context.MODE_PRIVATE)
 
-    private val _darkTheme = MutableStateFlow(
-        if (prefs.contains(KEY_DARK_THEME)) prefs.getBoolean(KEY_DARK_THEME, false) else null,
+    // Same on-disk format as the old dark theme switch (true / false / absent = system),
+    // so a choice saved by an earlier version still applies without a migration.
+    private val _themeMode = MutableStateFlow(
+        when {
+            !prefs.contains(KEY_DARK_THEME) -> ThemeMode.SYSTEM
+            prefs.getBoolean(KEY_DARK_THEME, false) -> ThemeMode.DARK
+            else -> ThemeMode.LIGHT
+        },
     )
-    override val darkTheme: StateFlow<Boolean?> = _darkTheme.asStateFlow()
+    override val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
 
-    override fun setDarkTheme(enabled: Boolean) {
-        prefs.edit { putBoolean(KEY_DARK_THEME, enabled) }
-        _darkTheme.value = enabled
+    override fun setThemeMode(mode: ThemeMode) {
+        prefs.edit {
+            when (mode) {
+                ThemeMode.SYSTEM -> remove(KEY_DARK_THEME)
+                ThemeMode.LIGHT -> putBoolean(KEY_DARK_THEME, false)
+                ThemeMode.DARK -> putBoolean(KEY_DARK_THEME, true)
+            }
+        }
+        _themeMode.value = mode
     }
 
     private companion object {
