@@ -1,0 +1,2 @@
+- use the git  `git merge` command in all of the worktrees in the .trees folder
+  - and fix any conflicts if exists

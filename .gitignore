@@ -17,3 +17,6 @@ local.properties
 *.keystore
 .env
 google-services.json
+
+# ktlint CLI for the Claude Code hook (download with tools/get-ktlint.sh)
+/tools/ktlint
