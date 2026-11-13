@@ -145,6 +145,44 @@ class AddWorkoutContentTest {
     }
 
     @Test
+    fun saveButton_showsProgressOnlyWhileSaving() {
+        setContent(emptyForm.copy(isSaving = true))
+
+        rule.onNodeWithContentDescription(str(R.string.saving), useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun saveButton_hasNoProgressWhenIdle() {
+        setContent(emptyForm)
+
+        rule.onNodeWithContentDescription(str(R.string.saving), useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun dateField_saysHowLongAgoTheDateIs() {
+        setContent(emptyForm.copy(date = today.minusDays(1)))
+
+        rule.onNodeWithText(str(R.string.date_yesterday)).assertIsDisplayed()
+    }
+
+    @Test
+    fun nameField_countsTrimmedCharacters() {
+        setContent(emptyForm)
+
+        rule.onNodeWithText(str(R.string.field_name)).performTextInput(" Run ")
+
+        rule.onNodeWithText("3/50").assertIsDisplayed()
+    }
+
+    @Test
+    fun durationField_showsTheAllowedRangeUntilInvalid() {
+        setContent(emptyForm)
+        val hint = rule.activity.getString(R.string.duration_hint, 1, 1440)
+
+        rule.onNodeWithText(hint).assertIsDisplayed()
+    }
+
+    @Test
     fun backArrow_callsOnBack() {
         setContent(emptyForm)
 

@@ -13,10 +13,12 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import java.io.IOException
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -90,6 +92,38 @@ class AddWorkoutViewModelTest {
 
         assertTrue(viewModel.uiState.value.errors.isEmpty())
         coVerify(exactly = 1) { repository.add(Workout(name = "Cycling", date = date, durationMinutes = 60)) }
+    }
+
+    @Test
+    fun `saving again after a successful save does not store a duplicate`() = runTest {
+        viewModel.onNameChange("Run")
+        viewModel.onDurationChange("30")
+
+        viewModel.saved.test {
+            viewModel.onSave()
+            awaitItem()
+            viewModel.onSave()
+            expectNoEvents()
+        }
+
+        assertTrue(viewModel.uiState.value.isSaving)
+        coVerify(exactly = 1) { repository.add(any()) }
+    }
+
+    @Test
+    fun `failed save emits saveFailed, keeps the input and allows retrying`() = runTest {
+        coEvery { repository.add(any()) } throws IOException("disk full")
+        viewModel.onNameChange("Run")
+        viewModel.onDurationChange("30")
+
+        viewModel.saveFailed.test {
+            viewModel.onSave()
+            awaitItem()
+        }
+
+        assertFalse(viewModel.uiState.value.isSaving)
+        assertEquals("Run", viewModel.uiState.value.name)
+        viewModel.saved.test { expectNoEvents() }
     }
 
     @Test

@@ -10,6 +10,7 @@ import com.fitnessmarket.bootcamptodo.domain.AddWorkoutError
 import com.fitnessmarket.bootcamptodo.domain.AddWorkoutResult
 import com.fitnessmarket.bootcamptodo.domain.AddWorkoutUseCase
 import com.fitnessmarket.bootcamptodo.domain.PhotoStore
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,6 +48,11 @@ class AddWorkoutViewModel(
     /** Emits once after the workout is stored; the screen navigates back. */
     val saved: Flow<Unit> = _saved.receiveAsFlow()
 
+    private val _saveFailed = Channel<Unit>(Channel.BUFFERED)
+
+    /** Emits once when storing the workout fails; the screen shows a message and the user can retry. */
+    val saveFailed: Flow<Unit> = _saveFailed.receiveAsFlow()
+
     fun onNameChange(name: String) = _uiState.update {
         it.copy(name = name, errors = it.errors - setOf(AddWorkoutError.NAME_BLANK, AddWorkoutError.NAME_TOO_LONG))
     }
@@ -72,9 +78,19 @@ class AddWorkoutViewModel(
         _uiState.update { it.copy(isSaving = true) }
 
         viewModelScope.launch {
-            when (val result = addWorkout(state.name, state.date, state.durationText, state.photoFileName)) {
+            val result = try {
+                addWorkout(state.name, state.date, state.durationText, state.photoFileName)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _uiState.update { it.copy(isSaving = false) }
+                _saveFailed.send(Unit)
+                return@launch
+            }
+            when (result) {
                 AddWorkoutResult.Success -> {
-                    _uiState.update { it.copy(isSaving = false, errors = emptySet()) }
+                    // isSaving stays true: the screen is closing, and a second tap must not store a duplicate.
+                    _uiState.update { it.copy(errors = emptySet()) }
                     _saved.send(Unit)
                 }
                 is AddWorkoutResult.Invalid ->
