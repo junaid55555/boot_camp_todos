@@ -88,7 +88,7 @@ fun WorkoutListContent(
     onRetry: () -> Unit,
 ) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.home_title)) }) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddClick) {
                 Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.add_workout))

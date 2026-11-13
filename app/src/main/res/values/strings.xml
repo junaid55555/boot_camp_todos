@@ -19,6 +19,7 @@
     <string name="data_storage_description">Stored privately on this device. Nothing is uploaded.</string>
 
     <!-- List screen -->
+    <string name="home_title">My Work Routine</string>
     <string name="add_workout">Add workout</string>
     <string name="empty_workouts">No workouts yet</string>
     <string name="empty_workouts_body">Log your first workout and it will show up here, newest first.</string>
